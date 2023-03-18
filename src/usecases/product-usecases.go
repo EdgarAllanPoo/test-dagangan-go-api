@@ -40,3 +40,21 @@ func (interactor *ProductInteractor) FindById(id int64) (*domain.Product, error)
 	}
 	return result, nil
 }
+
+func (interactor *ProductInteractor) DeleteProduct(id int64) error {
+	err := interactor.ProductRepository.DeleteProduct(id)
+	if err != nil {
+		log.Println(err.Error())
+		return err
+	}
+	return nil
+}
+
+func (interactor *ProductInteractor) UpdateProduct(id int64, product domain.Product) error {
+	err := interactor.ProductRepository.UpdateProduct(id, product)
+	if err != nil {
+		log.Println(err.Error())
+		return err
+	}
+	return nil
+}

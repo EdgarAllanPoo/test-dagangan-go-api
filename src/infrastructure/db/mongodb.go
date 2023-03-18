@@ -10,6 +10,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+var productCollection string = "products"
+
 type DBHandler struct {
 	MongoClient mongo.Client
 	database    *mongo.Database
@@ -35,7 +37,7 @@ func NewDBHandler(connectString string, dbName string) (DBHandler, error) {
 
 func (dbHandler DBHandler) FindAllProducts() ([]*domain.Product, error) {
 	var results []*domain.Product
-	collection := dbHandler.database.Collection("products")
+	collection := dbHandler.database.Collection(productCollection)
 	cur, err := collection.Find(context.TODO(), bson.D{{}})
 	if err != nil {
 		return nil, err
@@ -53,7 +55,7 @@ func (dbHandler DBHandler) FindAllProducts() ([]*domain.Product, error) {
 
 func (dbHandler DBHandler) FindProductById(id int64) (*domain.Product, error) {
 	var result domain.Product
-	collection := dbHandler.database.Collection("products")
+	collection := dbHandler.database.Collection(productCollection)
 	err := collection.FindOne(context.TODO(), bson.M{"id": id}).Decode(&result)
 	if err != nil {
 		return nil, err
@@ -62,8 +64,31 @@ func (dbHandler DBHandler) FindProductById(id int64) (*domain.Product, error) {
 }
 
 func (dbHandler DBHandler) SaveProduct(product domain.Product) error {
-	collection := dbHandler.database.Collection("products")
+	collection := dbHandler.database.Collection(productCollection)
 	_, err := collection.InsertOne(context.TODO(), product)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (dbHandler DBHandler) DeleteProduct(id int64) error {
+	collection := dbHandler.database.Collection(productCollection)
+	_, err := collection.DeleteOne(context.TODO(), bson.M{"id": id})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (dbHandler DBHandler) UpdateProduct(id int64, product domain.Product) error {
+	collection := dbHandler.database.Collection(productCollection)
+	filter := bson.M{"id": id}
+	update := bson.M{"$set": bson.M{
+		"name":  product.Name,
+		"price": product.Price,
+	}}
+	_, err := collection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
 		return err
 	}

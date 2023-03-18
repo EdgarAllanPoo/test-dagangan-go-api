@@ -1,16 +1,3 @@
-// import "go.mongodb.org/mongo-driver/mongo"
-
-// serverAPIOptions := options.ServerAPI(options.ServerAPIVersion1)
-// clientOptions := options.Client().
-//     ApplyURI("mongodb+srv://rerheza:<password>@cluster0.984mmpj.mongodb.net/?retryWrites=true&w=majority").
-//     SetServerAPIOptions(serverAPIOptions)
-// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-// defer cancel()
-// client, err := mongo.Connect(ctx, clientOptions)
-// if err != nil {
-//     log.Fatal(err)
-// }
-
 package main
 
 import (
@@ -42,7 +29,6 @@ func getProductController() controllers.ProductController {
 }
 
 func main() {
-
 	httpRouter.GET("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "App is up and running..")
 	})
@@ -58,5 +44,7 @@ func main() {
 	httpRouter.POST("/product/add", productController.Add)
 	httpRouter.GET("/product", productController.FindAll)
 	httpRouter.GET("/product/{id}", productController.FindById)
+	httpRouter.DELETE("/delete/{id}", productController.Delete)
+	httpRouter.PUT("/update/{id}", productController.Update)
 	httpRouter.SERVE(":8000")
 }
