@@ -58,3 +58,12 @@ func (interactor *ProductInteractor) UpdateProduct(id int64, product domain.Prod
 	}
 	return nil
 }
+
+func (interactor *ProductInteractor) FilterByCategory(category string) ([]*domain.Product, error) {
+	results, err := interactor.ProductRepository.FilterByCategory(category)
+	if err != nil {
+		log.Println(err.Error())
+		return nil, err
+	}
+	return results, nil
+}

@@ -51,3 +51,11 @@ func (repo ProductRepo) UpdateProduct(id int64, product domain.Product) error {
 	}
 	return nil
 }
+
+func (repo ProductRepo) FilterByCategory(category string) ([]*domain.Product, error) {
+	results, err := repo.handler.FilterProductsByCategory(category)
+	if err != nil {
+		return results, err
+	}
+	return results, nil
+}

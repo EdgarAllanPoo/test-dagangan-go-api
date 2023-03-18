@@ -128,3 +128,24 @@ func (controller *ProductController) Update(res http.ResponseWriter, req *http.R
 	}
 	res.WriteHeader(http.StatusOK)
 }
+
+func (controller *ProductController) FilterByCategory(res http.ResponseWriter, req *http.Request) {
+	res.Header().Set("Content-Type", "application/json")
+
+	category := req.URL.Query().Get("category")
+	if category == "" {
+		res.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(res).Encode(ErrorResponse{Message: "Missing category parameter"})
+		return
+	}
+
+	results, err := controller.productInteractor.FilterByCategory(category)
+	if err != nil {
+		res.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(res).Encode(ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	res.WriteHeader(http.StatusOK)
+	json.NewEncoder(res).Encode(results)
+}

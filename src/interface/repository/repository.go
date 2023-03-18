@@ -8,4 +8,5 @@ type DBHandler interface {
 	SaveProduct(product domain.Product) error
 	DeleteProduct(id int64) error
 	UpdateProduct(id int64, product domain.Product) error
+	FilterProductsByCategory(category string) ([]*domain.Product, error)
 }

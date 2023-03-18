@@ -46,5 +46,6 @@ func main() {
 	httpRouter.GET("/product/{id}", productController.FindById)
 	httpRouter.DELETE("/delete/{id}", productController.Delete)
 	httpRouter.PUT("/update/{id}", productController.Update)
+	httpRouter.GET("/filter", productController.FilterByCategory)
 	httpRouter.SERVE(":8000")
 }

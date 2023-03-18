@@ -85,12 +85,31 @@ func (dbHandler DBHandler) UpdateProduct(id int64, product domain.Product) error
 	collection := dbHandler.database.Collection(productCollection)
 	filter := bson.M{"id": id}
 	update := bson.M{"$set": bson.M{
-		"name":  product.Name,
-		"price": product.Price,
+		"name":     product.Name,
+		"price":    product.Price,
+		"category": product.Category,
 	}}
 	_, err := collection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func (dbHandler DBHandler) FilterProductsByCategory(category string) ([]*domain.Product, error) {
+	var results []*domain.Product
+	collection := dbHandler.database.Collection(productCollection)
+	cur, err := collection.Find(context.TODO(), bson.M{"category": category})
+	if err != nil {
+		return nil, err
+	}
+	for cur.Next(context.TODO()) {
+		var elem domain.Product
+		err2 := cur.Decode(&elem)
+		if err2 != nil {
+			log.Fatal(err2)
+		}
+		results = append(results, &elem)
+	}
+	return results, nil
 }
