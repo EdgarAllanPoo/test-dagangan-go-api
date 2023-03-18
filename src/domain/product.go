@@ -9,7 +9,7 @@ type Product struct {
 
 type ProductRepository interface {
 	SaveProduct(product Product) error
-	FindAll(category string) ([]*Product, error)
+	FindAll(category string, limit, offset int) ([]*Product, error)
 	FindById(id int64) (*Product, error)
 	UpdateProduct(id int64, product Product) error
 	DeleteProduct(id int64) error

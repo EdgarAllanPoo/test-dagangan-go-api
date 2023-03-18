@@ -23,8 +23,8 @@ func (interactor *ProductInteractor) CreateProduct(product domain.Product) error
 	return nil
 }
 
-func (interactor *ProductInteractor) FindAll(category string) ([]*domain.Product, error) {
-	results, err := interactor.ProductRepository.FindAll(category)
+func (interactor *ProductInteractor) FindAll(category string, limit, offset int) ([]*domain.Product, error) {
+	results, err := interactor.ProductRepository.FindAll(category, limit, offset)
 	if err != nil {
 		log.Println(err.Error())
 		return nil, err

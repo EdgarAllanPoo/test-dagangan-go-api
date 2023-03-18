@@ -35,14 +35,17 @@ func NewDBHandler(connectString string, dbName string) (DBHandler, error) {
 	return dbHandler, nil
 }
 
-func (dbHandler DBHandler) FindAllProducts(category string) ([]*domain.Product, error) {
+func (dbHandler DBHandler) FindAllProducts(category string, limit, offset int) ([]*domain.Product, error) {
 	var results []*domain.Product
 	collection := dbHandler.database.Collection(productCollection)
 	filter := bson.D{}
 	if category != "" {
 		filter = bson.D{{Key: "category", Value: category}}
 	}
-	cur, err := collection.Find(context.TODO(), filter)
+	options := options.Find()
+	options.SetLimit(int64(limit))
+	options.SetSkip(int64(offset))
+	cur, err := collection.Find(context.TODO(), filter, options)
 	if err != nil {
 		return nil, err
 	}

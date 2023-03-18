@@ -42,10 +42,23 @@ func (controller *ProductController) FindAll(res http.ResponseWriter, req *http.
 	res.Header().Set("Content-Type", "application/json")
 
 	category := req.URL.Query().Get("category")
+	limitStr := req.URL.Query().Get("limit")
+	offsetStr := req.URL.Query().Get("offset")
 
 	var results []*domain.Product
 	var err error
-	results, err = controller.productInteractor.FindAll(category)
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil {
+		limit = 10 // default value
+	}
+
+	offset, err := strconv.Atoi(offsetStr)
+	if err != nil {
+		offset = 0 // default value
+	}
+
+	results, err = controller.productInteractor.FindAll(category, limit, offset)
 
 	if err != nil {
 		res.WriteHeader(http.StatusInternalServerError)

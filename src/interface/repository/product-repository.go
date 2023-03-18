@@ -20,8 +20,8 @@ func (repo ProductRepo) SaveProduct(product domain.Product) error {
 	return nil
 }
 
-func (repo ProductRepo) FindAll(category string) ([]*domain.Product, error) {
-	results, err := repo.handler.FindAllProducts(category)
+func (repo ProductRepo) FindAll(category string, limit, offset int) ([]*domain.Product, error) {
+	results, err := repo.handler.FindAllProducts(category, limit, offset)
 	if err != nil {
 		return results, err
 	}
