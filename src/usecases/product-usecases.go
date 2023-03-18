@@ -23,8 +23,8 @@ func (interactor *ProductInteractor) CreateProduct(product domain.Product) error
 	return nil
 }
 
-func (interactor *ProductInteractor) FindAll() ([]*domain.Product, error) {
-	results, err := interactor.ProductRepository.FindAll()
+func (interactor *ProductInteractor) FindAll(category string) ([]*domain.Product, error) {
+	results, err := interactor.ProductRepository.FindAll(category)
 	if err != nil {
 		log.Println(err.Error())
 		return nil, err
@@ -57,13 +57,4 @@ func (interactor *ProductInteractor) UpdateProduct(id int64, product domain.Prod
 		return err
 	}
 	return nil
-}
-
-func (interactor *ProductInteractor) FilterByCategory(category string) ([]*domain.Product, error) {
-	results, err := interactor.ProductRepository.FilterByCategory(category)
-	if err != nil {
-		log.Println(err.Error())
-		return nil, err
-	}
-	return results, nil
 }

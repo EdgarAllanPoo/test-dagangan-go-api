@@ -41,11 +41,10 @@ func main() {
 	}
 
 	productController := getProductController()
-	httpRouter.POST("/product/add", productController.Add)
-	httpRouter.GET("/product", productController.FindAll)
+	httpRouter.POST("/product", productController.Add)
+	httpRouter.GET("/products", productController.FindAll)
 	httpRouter.GET("/product/{id}", productController.FindById)
-	httpRouter.DELETE("/delete/{id}", productController.Delete)
-	httpRouter.PUT("/update/{id}", productController.Update)
-	httpRouter.GET("/filter", productController.FilterByCategory)
+	httpRouter.DELETE("/product/{id}", productController.Delete)
+	httpRouter.PUT("/product/{id}", productController.Update)
 	httpRouter.SERVE(":8000")
 }

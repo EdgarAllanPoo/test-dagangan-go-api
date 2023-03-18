@@ -20,8 +20,8 @@ func (repo ProductRepo) SaveProduct(product domain.Product) error {
 	return nil
 }
 
-func (repo ProductRepo) FindAll() ([]*domain.Product, error) {
-	results, err := repo.handler.FindAllProducts()
+func (repo ProductRepo) FindAll(category string) ([]*domain.Product, error) {
+	results, err := repo.handler.FindAllProducts(category)
 	if err != nil {
 		return results, err
 	}
@@ -50,12 +50,4 @@ func (repo ProductRepo) UpdateProduct(id int64, product domain.Product) error {
 		return err
 	}
 	return nil
-}
-
-func (repo ProductRepo) FilterByCategory(category string) ([]*domain.Product, error) {
-	results, err := repo.handler.FilterProductsByCategory(category)
-	if err != nil {
-		return results, err
-	}
-	return results, nil
 }

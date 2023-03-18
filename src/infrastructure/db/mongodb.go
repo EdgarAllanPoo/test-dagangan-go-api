@@ -35,14 +35,18 @@ func NewDBHandler(connectString string, dbName string) (DBHandler, error) {
 	return dbHandler, nil
 }
 
-func (dbHandler DBHandler) FindAllProducts() ([]*domain.Product, error) {
+func (dbHandler DBHandler) FindAllProducts(category string) ([]*domain.Product, error) {
 	var results []*domain.Product
 	collection := dbHandler.database.Collection(productCollection)
-	cur, err := collection.Find(context.TODO(), bson.D{{}})
+	filter := bson.D{}
+	if category != "" {
+		filter = bson.D{{Key: "category", Value: category}}
+	}
+	cur, err := collection.Find(context.TODO(), filter)
 	if err != nil {
 		return nil, err
 	}
-	for cur.Next(context.TODO()) {
+	for cur.Next(context.Background()) {
 		var elem domain.Product
 		err2 := cur.Decode(&elem)
 		if err2 != nil {
@@ -94,22 +98,4 @@ func (dbHandler DBHandler) UpdateProduct(id int64, product domain.Product) error
 		return err
 	}
 	return nil
-}
-
-func (dbHandler DBHandler) FilterProductsByCategory(category string) ([]*domain.Product, error) {
-	var results []*domain.Product
-	collection := dbHandler.database.Collection(productCollection)
-	cur, err := collection.Find(context.TODO(), bson.M{"category": category})
-	if err != nil {
-		return nil, err
-	}
-	for cur.Next(context.TODO()) {
-		var elem domain.Product
-		err2 := cur.Decode(&elem)
-		if err2 != nil {
-			log.Fatal(err2)
-		}
-		results = append(results, &elem)
-	}
-	return results, nil
 }

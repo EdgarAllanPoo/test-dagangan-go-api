@@ -40,12 +40,19 @@ func (controller *ProductController) Add(res http.ResponseWriter, req *http.Requ
 
 func (controller *ProductController) FindAll(res http.ResponseWriter, req *http.Request) {
 	res.Header().Set("Content-Type", "application/json")
-	results, err2 := controller.productInteractor.FindAll()
-	if err2 != nil {
+
+	category := req.URL.Query().Get("category")
+
+	var results []*domain.Product
+	var err error
+	results, err = controller.productInteractor.FindAll(category)
+
+	if err != nil {
 		res.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(res).Encode(ErrorResponse{Message: err2.Error()})
+		json.NewEncoder(res).Encode(ErrorResponse{Message: err.Error()})
 		return
 	}
+
 	res.WriteHeader(http.StatusOK)
 	json.NewEncoder(res).Encode(results)
 }
@@ -127,25 +134,4 @@ func (controller *ProductController) Update(res http.ResponseWriter, req *http.R
 		return
 	}
 	res.WriteHeader(http.StatusOK)
-}
-
-func (controller *ProductController) FilterByCategory(res http.ResponseWriter, req *http.Request) {
-	res.Header().Set("Content-Type", "application/json")
-
-	category := req.URL.Query().Get("category")
-	if category == "" {
-		res.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(res).Encode(ErrorResponse{Message: "Missing category parameter"})
-		return
-	}
-
-	results, err := controller.productInteractor.FilterByCategory(category)
-	if err != nil {
-		res.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(res).Encode(ErrorResponse{Message: err.Error()})
-		return
-	}
-
-	res.WriteHeader(http.StatusOK)
-	json.NewEncoder(res).Encode(results)
 }
