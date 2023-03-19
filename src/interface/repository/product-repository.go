@@ -20,12 +20,12 @@ func (repo ProductRepo) SaveProduct(product domain.Product) error {
 	return nil
 }
 
-func (repo ProductRepo) FindAll(category string, limit, offset int) ([]*domain.Product, error) {
-	results, err := repo.handler.FindAllProducts(category, limit, offset)
+func (repo ProductRepo) FindAll(category string, limit, offset int) ([]*domain.Product, int64, error) {
+	results, totalRows, err := repo.handler.FindAllProducts(category, limit, offset)
 	if err != nil {
-		return results, err
+		return results, 0, err
 	}
-	return results, nil
+	return results, totalRows, nil
 }
 
 func (repo ProductRepo) FindById(id int64) (*domain.Product, error) {

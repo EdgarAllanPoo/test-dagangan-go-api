@@ -33,7 +33,8 @@ func getProductController() controllers.ProductController {
 
 func main() {
 	var err error
-	err = godotenv.Load()
+	var envFilepath string = "../.env"
+	err = godotenv.Load(envFilepath)
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
@@ -59,5 +60,5 @@ func main() {
 	httpRouter.GET("/product/{id}", productController.FindById)
 	httpRouter.DELETE("/product/{id}", productController.Delete)
 	httpRouter.PUT("/product/{id}", productController.Update)
-	httpRouter.SERVE(port)
+	httpRouter.SERVE(":" + port)
 }

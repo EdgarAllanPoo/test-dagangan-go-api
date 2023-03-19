@@ -29,13 +29,14 @@ func (controller *ProductController) Add(res http.ResponseWriter, req *http.Requ
 		json.NewEncoder(res).Encode(ErrorResponse{Message: "Invalid Payload"})
 		return
 	}
-	err2 := controller.productInteractor.CreateProduct(product)
-	if err2 != nil {
+	err = controller.productInteractor.CreateProduct(product)
+	if err != nil {
 		res.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(res).Encode(ErrorResponse{Message: err2.Error()})
+		json.NewEncoder(res).Encode(ErrorResponse{Message: err.Error()})
 		return
 	}
 	res.WriteHeader(http.StatusOK)
+	json.NewEncoder(res).Encode(SuccessResponse{Message: "Successfully insert new object into product"})
 }
 
 func (controller *ProductController) FindAll(res http.ResponseWriter, req *http.Request) {
@@ -46,19 +47,23 @@ func (controller *ProductController) FindAll(res http.ResponseWriter, req *http.
 	offsetStr := req.URL.Query().Get("offset")
 
 	var results []*domain.Product
+	var totalRows int64
 	var err error
+
+	defaultLimit := 10
+	defaultOffset := 0
 
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil {
-		limit = 10 // default value
+		limit = defaultLimit
 	}
 
 	offset, err := strconv.Atoi(offsetStr)
 	if err != nil {
-		offset = 0 // default value
+		offset = defaultOffset
 	}
 
-	results, err = controller.productInteractor.FindAll(category, limit, offset)
+	results, totalRows, err = controller.productInteractor.FindAll(category, limit, offset)
 
 	if err != nil {
 		res.WriteHeader(http.StatusInternalServerError)
@@ -67,7 +72,10 @@ func (controller *ProductController) FindAll(res http.ResponseWriter, req *http.
 	}
 
 	res.WriteHeader(http.StatusOK)
-	json.NewEncoder(res).Encode(results)
+	json.NewEncoder(res).Encode(map[string]interface{}{
+		"data":       results,
+		"total_rows": totalRows,
+	})
 }
 
 func (controller *ProductController) FindById(res http.ResponseWriter, req *http.Request) {
@@ -76,7 +84,6 @@ func (controller *ProductController) FindById(res http.ResponseWriter, req *http
 	vars := mux.Vars(req)
 	idStr := vars["id"]
 
-	// Parse the string ID to an int64
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		res.WriteHeader(http.StatusBadRequest)
@@ -100,7 +107,6 @@ func (controller *ProductController) Delete(res http.ResponseWriter, req *http.R
 	vars := mux.Vars(req)
 	idStr := vars["id"]
 
-	// Parse the string ID to an int64
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		res.WriteHeader(http.StatusBadRequest)
@@ -108,13 +114,14 @@ func (controller *ProductController) Delete(res http.ResponseWriter, req *http.R
 		return
 	}
 
-	err2 := controller.productInteractor.DeleteProduct(id)
-	if err2 != nil {
+	err = controller.productInteractor.DeleteProduct(id)
+	if err != nil {
 		res.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(res).Encode(ErrorResponse{Message: err2.Error()})
+		json.NewEncoder(res).Encode(ErrorResponse{Message: err.Error()})
 		return
 	}
 	res.WriteHeader(http.StatusOK)
+	json.NewEncoder(res).Encode(SuccessResponse{Message: "Successfully deleted object with Id " + idStr})
 }
 
 func (controller *ProductController) Update(res http.ResponseWriter, req *http.Request) {
@@ -123,7 +130,6 @@ func (controller *ProductController) Update(res http.ResponseWriter, req *http.R
 	vars := mux.Vars(req)
 	idStr := vars["id"]
 
-	// Parse the string ID to an int64
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		res.WriteHeader(http.StatusBadRequest)
@@ -140,11 +146,13 @@ func (controller *ProductController) Update(res http.ResponseWriter, req *http.R
 	}
 
 	updatedProduct.Id = id
-	err2 := controller.productInteractor.UpdateProduct(id, updatedProduct)
-	if err2 != nil {
+	err = controller.productInteractor.UpdateProduct(id, updatedProduct)
+	if err != nil {
 		res.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(res).Encode(ErrorResponse{Message: err2.Error()})
+		json.NewEncoder(res).Encode(ErrorResponse{Message: err.Error()})
 		return
 	}
 	res.WriteHeader(http.StatusOK)
+	json.NewEncoder(res).Encode(SuccessResponse{Message: "Successfully updated object with Id " + idStr})
+
 }

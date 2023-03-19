@@ -23,13 +23,18 @@ func (interactor *ProductInteractor) CreateProduct(product domain.Product) error
 	return nil
 }
 
-func (interactor *ProductInteractor) FindAll(category string, limit, offset int) ([]*domain.Product, error) {
-	results, err := interactor.ProductRepository.FindAll(category, limit, offset)
+func (interactor *ProductInteractor) FindAll(category string, limit, offset int) ([]*domain.Product, int64, error) {
+	results, totalRows, err := interactor.ProductRepository.FindAll(category, limit, offset)
 	if err != nil {
 		log.Println(err.Error())
-		return nil, err
+		return nil, 0, err
 	}
-	return results, nil
+
+	if results == nil {
+		results = []*domain.Product{}
+	}
+
+	return results, totalRows, nil
 }
 
 func (interactor *ProductInteractor) FindById(id int64) (*domain.Product, error) {

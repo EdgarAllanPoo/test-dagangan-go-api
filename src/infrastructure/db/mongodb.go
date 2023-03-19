@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/EdgarAllanPoo/test-go-api/src/domain"
@@ -35,7 +36,7 @@ func NewDBHandler(connectString string, dbName string) (DBHandler, error) {
 	return dbHandler, nil
 }
 
-func (dbHandler DBHandler) FindAllProducts(category string, limit, offset int) ([]*domain.Product, error) {
+func (dbHandler DBHandler) FindAllProducts(category string, limit, offset int) ([]*domain.Product, int64, error) {
 	var results []*domain.Product
 	collection := dbHandler.database.Collection(productCollection)
 	filter := bson.D{}
@@ -45,19 +46,27 @@ func (dbHandler DBHandler) FindAllProducts(category string, limit, offset int) (
 	options := options.Find()
 	options.SetLimit(int64(limit))
 	options.SetSkip(int64(offset))
+
+	var totalRows int64
+
+	totalRows, err := collection.CountDocuments(context.Background(), filter)
+	if err != nil {
+		return results, 0, err
+	}
+
 	cur, err := collection.Find(context.TODO(), filter, options)
 	if err != nil {
-		return nil, err
+		return results, 0, err
 	}
 	for cur.Next(context.Background()) {
 		var elem domain.Product
-		err2 := cur.Decode(&elem)
-		if err2 != nil {
-			log.Fatal(err2)
+		err := cur.Decode(&elem)
+		if err != nil {
+			log.Fatal(err)
 		}
 		results = append(results, &elem)
 	}
-	return results, nil
+	return results, totalRows, nil
 }
 
 func (dbHandler DBHandler) FindProductById(id int64) (*domain.Product, error) {
@@ -72,7 +81,18 @@ func (dbHandler DBHandler) FindProductById(id int64) (*domain.Product, error) {
 
 func (dbHandler DBHandler) SaveProduct(product domain.Product) error {
 	collection := dbHandler.database.Collection(productCollection)
-	_, err := collection.InsertOne(context.TODO(), product)
+
+	filter := bson.M{"id": product.Id}
+
+	count, err := collection.CountDocuments(context.Background(), filter)
+	if err != nil {
+		return err
+	}
+	if count > 0 {
+		return fmt.Errorf("product with Id %d already exists", product.Id)
+	}
+
+	_, err = collection.InsertOne(context.TODO(), product)
 	if err != nil {
 		return err
 	}
@@ -81,10 +101,15 @@ func (dbHandler DBHandler) SaveProduct(product domain.Product) error {
 
 func (dbHandler DBHandler) DeleteProduct(id int64) error {
 	collection := dbHandler.database.Collection(productCollection)
-	_, err := collection.DeleteOne(context.TODO(), bson.M{"id": id})
+	res, err := collection.DeleteOne(context.TODO(), bson.M{"id": id})
 	if err != nil {
 		return err
 	}
+
+	if res.DeletedCount == 0 {
+		return fmt.Errorf("product with Id %d not found", id)
+	}
+
 	return nil
 }
 
@@ -96,9 +121,14 @@ func (dbHandler DBHandler) UpdateProduct(id int64, product domain.Product) error
 		"price":    product.Price,
 		"category": product.Category,
 	}}
-	_, err := collection.UpdateOne(context.TODO(), filter, update)
+	result, err := collection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
 		return err
 	}
+
+	if result.MatchedCount == 0 {
+		return fmt.Errorf("product with Id %d not found", id)
+	}
+
 	return nil
 }
