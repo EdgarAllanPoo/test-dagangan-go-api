@@ -29,4 +29,4 @@ This API was built using GO and MongoDB, which provides CRUD operations, filteri
 * [GO](https://go.dev/)
 * [MongoDB](https://www.mongodb.com/)
 ### Authors
-* [EdgarAllanPoo](https://github.com/EdgarAllanPoo)
+* [EdgarAllanPoo](https://github.com/EdgarAllanPoo) - Rheza Rizqullah Ecaldy
